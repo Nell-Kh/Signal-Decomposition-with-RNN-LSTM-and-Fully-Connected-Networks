@@ -1,0 +1,26 @@
+{
+  "version": "1.00",
+  "signal": {
+    "amplitude": 1.0,
+    "duration": 10,
+    "fs": 1000
+  },
+  "noise": {
+    "amplitude_pct": 0.02,
+    "phase_range": 0.1
+  },
+  "dataset": {
+    "num_samples": 10000,
+    "window_size": 10,
+    "train_split": 0.8
+  },
+  "training": {
+    "learning_rate": 0.001,
+    "batch_size": 64,
+    "epochs": 50
+  },
+  "analysis": {
+    "noise_levels": [0.01, 0.02, 0.05, 0.08, 0.10, 0.15, 0.20],
+    "test_samples_per_level": 1000
+  }
+}

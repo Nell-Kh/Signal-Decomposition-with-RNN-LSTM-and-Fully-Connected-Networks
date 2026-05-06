@@ -60,3 +60,60 @@ def build_dataset(clean_signals, composite, num_samples, window_size, model_type
         y_data.append(y_target)
 
     return np.array(x_data), np.array(y_data)
+
+
+def build_dataset_with_fresh_noise(
+    clean_signals,
+    t,
+    frequencies,
+    amplitude,
+    phases,
+    noise_amplitude_pct,
+    noise_phase_range,
+    num_samples,
+    window_size,
+):
+    """
+    Build a synchronized dataset for all model types (HW1 spec).
+    
+    Returns:
+        x_fc:  (num_samples, 4 + window_size)
+        x_seq: (num_samples, window_size, 4 + 1)
+        y:     (num_samples, window_size)
+    """
+    x_fc_data = []
+    x_seq_data = []
+    y_data = []
+    one_hots = np.eye(4)
+    max_start = len(t) - window_size
+    two_pi = 2.0 * np.pi
+
+    for _ in range(num_samples):
+        target_idx = np.random.randint(0, 4)
+        c = one_hots[target_idx]
+        start_i = np.random.randint(0, max_start + 1)
+        t_window = t[start_i : start_i + window_size]
+
+        # Generate noisy composite for THIS specific window
+        noisy_sum = np.zeros(window_size, dtype=float)
+        for sin_idx, freq in enumerate(frequencies):
+            eps_a = np.random.uniform(-noise_amplitude_pct * amplitude, noise_amplitude_pct * amplitude)
+            eps_phi = np.random.uniform(-noise_phase_range, noise_phase_range)
+            noisy_sum += (amplitude + eps_a) * np.sin(two_pi * freq * t_window + phases[sin_idx] + eps_phi)
+
+        y_target = clean_signals[target_idx, start_i : start_i + window_size]
+
+        # FC Format
+        x_fc_data.append(np.concatenate([c, noisy_sum]))
+        
+        # Sequential Format (RNN/LSTM)
+        c_repeated = np.tile(c, (window_size, 1))
+        x_seq_data.append(np.hstack([c_repeated, noisy_sum.reshape(window_size, 1)]))
+        
+        y_data.append(y_target)
+
+    return (
+        np.array(x_fc_data, dtype=float),
+        np.array(x_seq_data, dtype=float),
+        np.array(y_data, dtype=float)
+    )

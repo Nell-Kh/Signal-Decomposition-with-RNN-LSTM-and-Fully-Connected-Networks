@@ -6,11 +6,13 @@ from pathlib import Path
 def load_config():
     """
     Load settings from config/setup.json.
-    Uses pathlib to find the project root reliably
-    regardless of where the script is called from.
+    Finds the project root by locating the config folder
+    relative to this file's actual location.
     """
-    project_root = Path(__file__).resolve().parents[4]
+    # This file is at: src/signal_decomp/shared/config.py
+    # Project root is 3 levels up
+    project_root = Path(__file__).resolve().parents[3]
     config_path = project_root / "config" / "setup.json"
 
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         return json.load(f)

@@ -14,10 +14,10 @@ __pycache__/
 # Environment variables
 .env
 
-# Data and results
+# Data
 data/*.npy
 data/meta.json
-results/
+
+# Coverage and cache
 .coverage
 scratch/
-weights/

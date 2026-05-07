@@ -12,6 +12,7 @@ Saves:
     data/Y.npy       shape: (10000, 10)    clean target (all models)
     data/meta.json   signal metadata (phases, config used)
 """
+
 import json
 from pathlib import Path
 
@@ -19,6 +20,7 @@ import numpy as np
 
 from signal_decomp.services.dataset import build_dataset_with_fresh_noise
 from signal_decomp.services.generator import apply_noise, generate_base_signals
+from signal_decomp.services.visualizer_anatomy import plot_dual_scale_anatomy, plot_clean_components
 from signal_decomp.shared.config import load_config
 from signal_decomp.shared.constants import FREQUENCIES
 
@@ -50,6 +52,13 @@ def main():
     noisy, composite = apply_noise(clean, phases, FREQUENCIES, t, amplitude, noise_amp, noise_phi)
     print(f"Composite shape: {composite.shape}")
     print(f"Composite range: {composite.min():.3f} to {composite.max():.3f}")
+
+    # Generate Dual-Scale Signal Anatomy Plot for debugging
+    Path("results").mkdir(exist_ok=True)
+    plot_dual_scale_anatomy(t, clean, clean.sum(axis=0), composite, "results/signal_anatomy.png")
+    plot_clean_components(t, clean, "results/clean_components.png")
+    print("Saved: results/signal_anatomy.png (Dual-Scale)")
+    print("Saved: results/clean_components.png (Clean Baseline)")
 
     # Step 4 — Build synchronized dataset for all models
     print(f"\nBuilding synchronized dataset ({num_samples} samples)...")

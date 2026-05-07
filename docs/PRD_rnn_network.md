@@ -3,34 +3,20 @@
 
 **Authors:** Nell Khoury, Yanal Serhan
 **Version:** 1.00
-**Last Updated:** 05.05.2026
+**Last Updated:** 07.05.2026
 
 ---
 
 ## 1. Overview
 
 ### 1.1 Purpose
-The Vanilla RNN processes the noisy composite signal as a
-**sequence of timesteps**, allowing it to capture temporal
-dependencies that the FC baseline completely ignores.
-Each timestep carries both the one-hot frequency selector
-and one noisy composite sample.
+The Vanilla RNN (Recurrent Neural Network) serves as the first step into temporal signal processing for this project. Unlike the Fully Connected baseline, the RNN processes the input window sequentially, allowing it to maintain a "hidden state" that captures temporal dependencies.
 
 ### 1.2 Role in the Project
-The RNN is the **middle ground** between FC and LSTM.
-It is expected to outperform FC at medium noise levels
-because it understands that sample t+1 follows sample t.
-However, it is expected to degrade before LSTM at high noise
-because its memory is limited — it cannot selectively forget
-irrelevant information the way LSTM can.
+The RNN is the **intermediate model**. It is expected to outperform the FC network on clean signals by utilizing sequential patterns, but it is expected to be more fragile than the LSTM under high noise due to the "vanishing gradient" problem inherent in simple recurrent loops.
 
 ### 1.3 Why Vanilla RNN?
-Vanilla RNN is the simplest sequential model. Including it
-between FC and LSTM lets us measure the exact benefit of:
-  1. Adding temporal awareness at all (FC -> RNN improvement)
-  2. Adding gated memory on top (RNN -> LSTM improvement)
-
-Without the vanilla RNN step, we cannot separate these two effects.
+A Vanilla RNN represents the simplest form of recurrent architecture. By comparing it to the FC network, we prove the value of sequential processing. By comparing it to the LSTM, we prove the necessity of "gating" mechanisms for handling noise and long-term dependencies.
 
 ---
 
@@ -51,22 +37,12 @@ Full input shape: (10, 5)
   = 10 timesteps x 5 features per step
 ```
 
-The one-hot vector c is repeated at every timestep so the network
-always knows which frequency to extract, even mid-sequence.
-
 ### 2.2 Output
 ```
 Y = predicted clean sinusoid window    shape: (10,)
 ```
 
-Output style: **many-to-one**
-The final hidden state (after processing all 10 steps) is mapped
-to R^10 via a linear layer.
-
-Justification for many-to-one:
-The network needs to see the full 10-step context before making
-a prediction. Outputting after every step (many-to-many) would
-force predictions before enough context is available.
+**Architecture Style:** Many-to-one. The network processes the entire 10-step sequence, and the final hidden state is used to project the full 10-sample output window.
 
 ---
 
@@ -85,36 +61,16 @@ Linear(64 -> 10)
 Output  (10,)
 ```
 
-### 3.2 How the RNN Hidden State Works
-```
-At each timestep j:
-  h_j = tanh(W_h * h_{j-1} + W_x * x_j + b)
-
-where:
-  h_{j-1} = previous hidden state (memory)
-  x_j     = current input [c, Sigma_noisy(t_i+j)]
-  W_h, W_x, b = learned parameters
-```
-
-The final h_10 encodes information from all 10 timesteps
-and is passed to the linear output layer.
-
-### 3.3 Design Decisions
+### 3.2 Design Decisions
 
 **Hidden dimension = 64:**
-Same as FC for fair comparison — the only difference
-between models should be the architecture, not the capacity.
+Standardized across all three models (FC, RNN, LSTM) to ensure the comparison is based on architecture type rather than parameter count.
 
-**1 RNN layer:**
-Sufficient for a window of 10 steps. Stacking layers adds
-complexity without clear benefit at this sequence length.
+**Orthogonal Initialization:**
+Simple RNNs are notoriously difficult to train. We use orthogonal weight initialization for the recurrent weights to keep the gradient scale close to 1.0 during the early stages of training.
 
-**Many-to-one output:**
-Justified above — full context needed before prediction.
-
-**tanh activation (built into nn.RNN):**
-Standard for RNN hidden states. Keeps values bounded
-which stabilizes training.
+**Many-to-one Mapping:**
+We collect the final hidden state after the 10th sample is processed. This ensures the model has seen the entire noisy window before attempting to reconstruct the clean version.
 
 ---
 
@@ -122,42 +78,27 @@ which stabilizes training.
 
 | Parameter     | Value  | Justification                              |
 |---------------|--------|--------------------------------------------|
-| Loss function | MSE    | Required by assignment                     |
-| Optimizer     | Adam   | Adaptive learning rate, robust to noise    |
-| Learning rate | 0.001  | Same as FC for fair comparison             |
-| Batch size    | 64     | Same as FC for fair comparison             |
-| Epochs        | 50     | Same as FC for fair comparison             |
-
-All training parameters are identical across all three models
-so that architecture is the only variable being compared.
+| Loss function | MSE    | Standard for signal reconstruction         |
+| Optimizer     | Adam   | Robustness against noisy gradients         |
+| Learning rate | 0.001  | Consistent with FC and LSTM                |
+| Batch size    | 64     | Efficient GPU/CPU utilization              |
+| Epochs        | 50     | Convergence checked during validation      |
 
 ---
 
-## 5. Expected Behavior vs FC
+## 5. Limitations
 
-| Noise Level | FC Expected | RNN Expected | Why                        |
-|-------------|-------------|--------------|----------------------------|
-| 1% - 2%     | Good        | Good         | Both handle low noise well |
-| 5% - 8%     | Degrades    | Better       | RNN uses temporal order    |
-| 10%+        | Poor        | Degrades     | RNN memory is too short    |
-| 15%+        | Very poor   | Poor         | Only LSTM survives here    |
+- **Vanishing Gradients:** Simple RNNs struggle to pass information across many steps without it being "washed out" or "exploding".
+- **Noise Sensitivity:** Without gates (like LSTM), the RNN hidden state is directly perturbed by every noisy input sample, making it less robust than gated architectures.
+- **Limited Context:** While it has "memory", it is effectively a "short-term" memory compared to LSTM.
 
 ---
 
-## 6. Limitations
+## 6. Acceptance Criteria
 
-- **Short memory:** hidden state from step 1 is diluted by step 10
-- **No gating:** cannot selectively forget irrelevant noise
-- **Vanishing gradient:** difficult to learn long-range dependencies
-- **No cell state:** unlike LSTM, has only one memory vector h
-
----
-
-## 7. Acceptance Criteria
-
-| Criterion                         | Target                     |
-|-----------------------------------|----------------------------|
-| Training converges                | Loss decreasing over epochs |
-| RNN MSE < FC MSE at 5-8% noise   | Demonstrated in analysis    |
-| RNN MSE > LSTM MSE at 10%+ noise | Demonstrated in analysis    |
-| Inference runs without error      | All 4 frequency selectors   |
+| Criterion                        | Target                    |
+|----------------------------------|---------------------------|
+| Training converges               | Loss decreasing over epochs|
+| Test MSE at 2% noise             | Better than FC (ideally)   |
+| Performance vs Noise             | Degrades faster than LSTM  |
+| Inference runs without error     | Validated on all frequencies|

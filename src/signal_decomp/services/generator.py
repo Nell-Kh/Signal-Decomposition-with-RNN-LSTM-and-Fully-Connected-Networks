@@ -5,11 +5,8 @@ def generate_base_signals(t, frequencies, amplitude, fixed_phases=None):
     """Generate 4 clean signals with fixed random phases."""
     num_freq = len(frequencies)
     clean_signals = np.zeros((num_freq, len(t)))
-    
-    if fixed_phases is not None:
-        phases = fixed_phases
-    else:
-        phases = np.random.uniform(0, 2 * np.pi, num_freq)
+
+    phases = fixed_phases if fixed_phases is not None else np.random.uniform(0, 2 * np.pi, num_freq)
 
     for i, freq in enumerate(frequencies):
         clean_signals[i] = amplitude * np.sin(2 * np.pi * freq * t + phases[i])

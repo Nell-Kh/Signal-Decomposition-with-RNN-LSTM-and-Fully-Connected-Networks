@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 
 
 def train_model(model, x_np, y_np, lr, batch_size, epochs):
@@ -48,6 +48,8 @@ def train_model(model, x_np, y_np, lr, batch_size, epochs):
             predictions = model(batch_x)
             loss = criterion(predictions, batch_y)
             loss.backward()
+            # Clip gradients to prevent explosion (crucial for RNN stability)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             epoch_loss += loss.item()
 

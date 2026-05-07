@@ -74,12 +74,7 @@ def build_dataset_with_fresh_noise(
     window_size,
 ):
     """
-    Build a synchronized dataset for all model types (HW1 spec).
-    
-    Returns:
-        x_fc:  (num_samples, 4 + window_size)
-        x_seq: (num_samples, window_size, 4 + 1)
-        y:     (num_samples, window_size)
+    Build a synchronized dataset with component-wise random noise (HW standard).
     """
     x_fc_data = []
     x_seq_data = []
@@ -105,11 +100,11 @@ def build_dataset_with_fresh_noise(
 
         # FC Format
         x_fc_data.append(np.concatenate([c, noisy_sum]))
-        
+
         # Sequential Format (RNN/LSTM)
         c_repeated = np.tile(c, (window_size, 1))
         x_seq_data.append(np.hstack([c_repeated, noisy_sum.reshape(window_size, 1)]))
-        
+
         y_data.append(y_target)
 
     return (

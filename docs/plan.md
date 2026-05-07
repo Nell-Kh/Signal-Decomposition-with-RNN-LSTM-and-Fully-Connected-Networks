@@ -47,18 +47,15 @@ graph TD
 *   **Single Responsibility:** Each service handles one specific domain (e.g., `generator.py` only deals with signal math).
 *   **Strategy Pattern:** The `Trainer` works with any model that inherits from `nn.Module`.
 
-## 4. Implementation Strategy
-1.  **Data Synchronization:** Ensure that the input window and target clean signal are generated from the exact same random seed/sample to maintain 100% correlation.
-2.  **RNN Stability:** Use Orthogonal Initialization and Gradient Clipping (max_norm=1.0) to handle the inherent instability of deep recurrent networks.
-3.  **Scaling:** Use `uv` for lightning-fast, reproducible dependency management and isolated virtual environments.
+## 4. Implementation Strategy (Paper-Level)
+1.  **Data Synchronization:** Expanded to **50,000 samples** to provide enough statistical variance for deep models to generalize beyond simple overfitting.
+2.  **Architecture Depth:** 
+    - **FC:** 3 layers with BatchNorm to prevent internal covariate shift during long training runs.
+    - **RNN/LSTM:** Multi-layer stacking (2-3 layers) with 0.1 Dropout to extract higher-order temporal features.
+3.  **Optimization:** Reduced Learning Rate (0.0005) and increased Epochs (300) to ensure high-fidelity convergence.
 
-## 5. Noise Sensitivity Protocol
+## 5. Noise Sensitivity & Visual Validation
 We evaluate model robustness by:
-1.  Fixing the trained model weights.
-2.  Generating fresh noisy test samples at varying amplitude percentages (1% to 20%).
-3.  Calculating the MSE for each level to identify the crossover point where RNN/LSTM memory benefits outweigh the FC's simplicity.
-
-## 6. Advanced Interpretation: Sequence Length Scalability
-To provide a deeper analysis of the architectural trade-offs, we include a **Long-Sequence Case Study (W=100)**.
-*   **Objective:** Demonstrate that recurrent models scale sub-linearly in complexity with respect to sequence length, whereas FC models scale linearly/quadratically.
-*   **Hypothesis:** As $W \to 100$, the temporal context provided to the LSTM will significantly out-compete the spatial mapping of the FC model, showcasing the "Temporal Advantage" of gated memory units.
+1.  **Noise Stress Test:** Fresh noisy samples from 1% to 20% amplitude noise.
+2.  **The Test (Visual):** Qualitative assessment of reconstruction alignment vs. clean ground truth on unseen test segments.
+3.  **Spectral Fidelity:** Ensuring the model correctly identifies the target frequency component from the composite spectrum.

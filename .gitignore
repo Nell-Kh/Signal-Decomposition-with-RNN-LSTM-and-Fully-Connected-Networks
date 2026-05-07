@@ -10,3 +10,14 @@ wheels/
 .venv
 __pycache__/
 .venv/
+
+# Environment variables
+.env
+
+# Data and results
+data/*.npy
+data/meta.json
+results/
+.coverage
+scratch/
+weights/

@@ -14,10 +14,6 @@ __pycache__/
 # Environment variables
 .env
 
-# Data
-data/*.npy
-data/meta.json
-
-# Coverage and cache
+# Data and results unblocked for Dr. Segal
 .coverage
 scratch/

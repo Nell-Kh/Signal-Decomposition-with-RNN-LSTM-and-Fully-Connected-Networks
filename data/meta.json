@@ -1,0 +1,21 @@
+{
+  "frequencies": [
+    1,
+    3,
+    5,
+    7
+  ],
+  "amplitude": 1.0,
+  "phases": [
+    0.03703877682102805,
+    3.7498354080167298,
+    2.4985886472013132,
+    4.3589108556267435
+  ],
+  "fs": 1000,
+  "duration": 10,
+  "noise_amplitude_pct": 0.02,
+  "noise_phase_range": 0.1,
+  "num_samples": 50000,
+  "window_size": 10
+}

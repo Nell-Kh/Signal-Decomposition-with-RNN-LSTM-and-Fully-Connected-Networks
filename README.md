@@ -42,7 +42,7 @@ Once the clean components are summed and noise is applied, the task becomes sign
 ### 3.1 The Vanilla RNN (Recurrent Neural Network)
 The RNN introduces the concept of a "Hidden State" ($h_t$), allowing the network to have a memory of previous samples.
 *   **Equation:** $h_t = \sigma(W_{ih}x_t + b_{ih} + W_{hh}h_{t-1} + b_{hh})$
-*   **The Struggle:** Simple RNNs suffer from **Vanishing Gradients**. As the sequence progresses, the early samples lose their influence. This is why our RNN Test MSE (**0.4609**) reflects the challenge of maintaining temporal correlation in noisy environments.
+*   **The Struggle:** Simple RNNs suffer from **Vanishing Gradients**. As the sequence progresses, the early samples lose their influence. This is why our RNN Test MSE (**0.3542**) reflects the challenge of maintaining temporal correlation in noisy environments.
 
 ### 3.2 The LSTM (Long Short-Term Memory) - The Gold Standard
 To solve the RNN's memory problem, we implemented a 3-layer stacked LSTM.
@@ -73,11 +73,11 @@ This plot tracks the **Mean Squared Error (MSE)** over 150 epochs.
 
 The "Hard Proof." This bar chart summarizes 10,000 independent tests on data the model has **never seen before**.
 
-![Final Performance](results/test_performance.png)
+![Final Performance](results/final_performance_v2.png)
 
-*   **FC (0.4319 MSE):** Proves that for short 10-sample windows, direct spatial mapping is the most precise strategy.
-*   **RNN (0.4609 MSE):** Demonstrates stable convergence but struggles slightly with the highest frequencies.
-*   **LSTM (0.5821 MSE):** While showing a higher error on this specific micro-slice, its internal gating ensures maximum robustness against phase-shifting noise.
+*   **FC (0.0413 MSE):** Proves that for short 10-sample windows, direct spatial mapping is the most precise strategy.
+*   **LSTM (0.1670 MSE):** Proves that gated recurrence is highly robust and out-performs vanilla RNNs.
+*   **RNN (0.3542 MSE):** Highlights the theoretical limitations of simple recurrence in high-frequency environments.
 
 ---
 

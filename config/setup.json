@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "signal": { "amplitude": 1.0, "duration": 10, "fs": 1000 },
   "noise": { "amplitude_pct": 0.02, "phase_range": 0.1 },
-  "dataset": { "num_samples": 15000, "window_size": 10, "train_split": 0.8 },
+  "dataset": { "num_samples": 50000, "window_size": 10, "train_split": 0.8 },
   "training": {
       "learning_rate": 0.001,
       "batch_size": 64,

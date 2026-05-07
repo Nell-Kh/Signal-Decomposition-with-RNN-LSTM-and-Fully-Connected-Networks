@@ -1,4 +1,5 @@
 """Loads project configuration from config/setup.json."""
+
 import json
 from pathlib import Path
 

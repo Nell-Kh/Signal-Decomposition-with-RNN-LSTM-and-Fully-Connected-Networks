@@ -12,6 +12,7 @@ def generate_base_signals(t, frequencies, amplitude, fixed_phases=None):
         clean_signals[i] = amplitude * np.sin(2 * np.pi * freq * t + phases[i])
     return clean_signals, phases
 
+
 def apply_noise(clean_signals, phases, frequencies, t, amplitude, noise_pct, noise_phi):
     """Apply random noise per sample using configured amplitude[cite: 13]."""
     n_samples = clean_signals.shape[1]

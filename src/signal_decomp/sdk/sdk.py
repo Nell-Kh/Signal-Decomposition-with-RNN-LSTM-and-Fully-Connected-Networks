@@ -17,9 +17,13 @@ class SignalDecompSDK:
             # Use provided phases (e.g. from meta.json) for evaluation consistency
             self._phases = np.array(phases)
             # Re-generate base signals with these fixed phases
-            self._clean, _ = generate_base_signals(self.t, FREQUENCIES, config["signal"]["amplitude"], fixed_phases=self._phases)
+            self._clean, _ = generate_base_signals(
+                self.t, FREQUENCIES, config["signal"]["amplitude"], fixed_phases=self._phases
+            )
         else:
-            self._clean, self._phases = generate_base_signals(self.t, FREQUENCIES, config["signal"]["amplitude"])
+            self._clean, self._phases = generate_base_signals(
+                self.t, FREQUENCIES, config["signal"]["amplitude"]
+            )
 
     def train(self, model_name, x_train, y_train):
         model = self._build_model(model_name)
@@ -66,7 +70,7 @@ class SignalDecompSDK:
         h = self.config["training"]["hidden_dim"]
         if model_name == "FC":
             w = self.config["dataset"]["window_size"]
-            input_dim = 4 + w   # one-hot(4) + noisy window
+            input_dim = 4 + w  # one-hot(4) + noisy window
             output_dim = w
             return FullyConnectedNetwork(input_dim=input_dim, output_dim=output_dim, hidden_dim=h)
         if model_name == "RNN":

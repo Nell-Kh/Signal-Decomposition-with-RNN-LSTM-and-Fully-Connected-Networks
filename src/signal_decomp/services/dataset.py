@@ -1,4 +1,5 @@
 """Dataset construction: sliding windows + one-hot selector."""
+
 import numpy as np
 
 
@@ -43,8 +44,8 @@ def build_dataset(clean_signals, composite, num_samples, window_size, model_type
         start_i = np.random.randint(0, max_start + 1)
 
         # Extract windows
-        x_window = composite[start_i: start_i + window_size]
-        y_target = clean_signals[target_idx, start_i: start_i + window_size]
+        x_window = composite[start_i : start_i + window_size]
+        y_target = clean_signals[target_idx, start_i : start_i + window_size]
 
         # Format input based on model type
         if model_type == "FC":
@@ -52,9 +53,9 @@ def build_dataset(clean_signals, composite, num_samples, window_size, model_type
             x_input = np.concatenate([c, x_window])
         else:
             # Sequence: 10 timesteps, each with [4 one-hot + 1 signal sample] = 5
-            c_repeated = np.tile(c, (window_size, 1))       # (10, 4)
-            x_reshaped = x_window.reshape(window_size, 1)   # (10, 1)
-            x_input = np.hstack([c_repeated, x_reshaped])   # (10, 5)
+            c_repeated = np.tile(c, (window_size, 1))  # (10, 4)
+            x_reshaped = x_window.reshape(window_size, 1)  # (10, 1)
+            x_input = np.hstack([c_repeated, x_reshaped])  # (10, 5)
 
         x_data.append(x_input)
         y_data.append(y_target)
@@ -92,9 +93,13 @@ def build_dataset_with_fresh_noise(
         # Generate noisy composite for THIS specific window
         noisy_sum = np.zeros(window_size, dtype=float)
         for sin_idx, freq in enumerate(frequencies):
-            eps_a = np.random.uniform(-noise_amplitude_pct * amplitude, noise_amplitude_pct * amplitude)
+            eps_a = np.random.uniform(
+                -noise_amplitude_pct * amplitude, noise_amplitude_pct * amplitude
+            )
             eps_phi = np.random.uniform(-noise_phase_range, noise_phase_range)
-            noisy_sum += (amplitude + eps_a) * np.sin(two_pi * freq * t_window + phases[sin_idx] + eps_phi)
+            noisy_sum += (amplitude + eps_a) * np.sin(
+                two_pi * freq * t_window + phases[sin_idx] + eps_phi
+            )
 
         y_target = clean_signals[target_idx, start_i : start_i + window_size]
 
@@ -110,5 +115,5 @@ def build_dataset_with_fresh_noise(
     return (
         np.array(x_fc_data, dtype=float),
         np.array(x_seq_data, dtype=float),
-        np.array(y_data, dtype=float)
+        np.array(y_data, dtype=float),
     )
